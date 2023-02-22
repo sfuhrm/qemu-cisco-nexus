@@ -6,6 +6,8 @@ A QEMU based approach that shows how to boot a QEMU NX-OS VM image
 as it can be downloaded from Cisco and initializes the networking
 of the NX-OS device.
 
+A full article discussing this topic can be read [here](https://sfuhrm.de/network-device-simulation-for-cisco-nexus-with-qemu-kvm/).
+
 ## Background
 
 The setup serves as a demonstration how to set up test devices in an automated
