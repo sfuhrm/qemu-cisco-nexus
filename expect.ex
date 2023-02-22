@@ -8,8 +8,6 @@
 # * configure the mgmt0 interface to use DHCP
 #
 
-set image "nxos.9.3.10.bin"
-
 set startTime [clock seconds]
 
 ## Access CLI
@@ -42,7 +40,7 @@ proc errorExit {msg} {
     exit 10;
 }
 
-logInfo "Setting up NX-OS. Image name is $image, Admin user is $adminUser, loginUser is $loginUser.";
+logInfo "Setting up NX-OS. Admin user is $adminUser, loginUser is $loginUser.";
 spawn netcat $consoleHost $consolePort
 expect_after eof { errorExit "netcat $consoleHost $consolePort failed" }
 
@@ -51,16 +49,13 @@ set timeout 10
 # CR just to get the prompt if we are stuck in boot loader
 send "\r"
 
-# TBD: only in exceptions?!
-expect "loader >" { send "boot $image\r" }
-logInfo "Loader";
-
 # reset colors / styles just in case the BIOS set background color to black
 puts "\u001b\[0m"
 
 set timeout 300
 
 expect "Abort Power On Auto Provisioning" {send "yes\r"} \
+    "login: " { logInfo "OK: Switch is already configured and ready for login. Quitting."; exit; }
     timeout { errorExit "Failed to abort POAP!"; }
 logInfo "Aborted POAP"
 
@@ -93,12 +88,24 @@ set timeoutprompt "Timeout waiting for prompt";
 expect "switch#" {send "conf t\r"} \
     timeout { errorExit $timeoutprompt; }
 
-expect "switch(config)#" {send "boot nxos bootflash://$image\r"} \
+# list boot flash so we get the name of the boot image
+expect "switch(config)#" {send "dir bootflash:\r"} \
     timeout { errorExit $timeoutprompt; }
 
+expect -re ".* (nxos.*\.bin)" {
+    set nxos_image $expect_out(1,string)
+    logInfo "Detected NXOS image in bootflash: $nxos_image.";
+    } \
+    timeout { errorExit $timeoutprompt; }
+
+expect "switch(config)#" {send "boot nxos bootflash:///$nxos_image\r"} \
+    timeout { errorExit $timeoutprompt; }
+
+set timeout 60
 expect "switch(config)#" {send "feature dhcp\r"} \
     timeout { errorExit $timeoutprompt; }
 
+set timeout 10
 expect "switch(config)#" {send "int mgmt0\r"} \
     timeout { errorExit $timeoutprompt; }
 
