@@ -55,7 +55,7 @@ puts "\u001b\[0m"
 set timeout 300
 
 expect "Abort Power On Auto Provisioning" {send "yes\r"} \
-    "login: " { logInfo "OK: Switch is already configured and ready for login. Quitting."; exit; }
+    "login: " { logInfo "OK: Switch is already configured and ready for login. Quitting."; exit; } \
     timeout { errorExit "Failed to abort POAP!"; }
 logInfo "Aborted POAP"
 
