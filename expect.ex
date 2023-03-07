@@ -13,8 +13,6 @@ set startTime [clock seconds]
 ## Access CLI
 set adminUser "admin"
 set adminPassword "admin"
-set loginUser "vagrant"
-set loginPassword "vagrant"
 set consoleHost localhost
 set consolePort 2023
 
@@ -40,7 +38,7 @@ proc errorExit {msg} {
     exit 10;
 }
 
-logInfo "Setting up NX-OS. Admin user is $adminUser, loginUser is $loginUser.";
+logInfo "Setting up NX-OS. Admin user is $adminUser.";
 spawn netcat $consoleHost $consolePort
 expect_after eof { errorExit "netcat $consoleHost $consolePort failed" }
 
